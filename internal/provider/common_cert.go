@@ -339,3 +339,31 @@ func createSubjectDistinguishedNames(ctx context.Context, subject certificateSub
 
 	return result
 }
+
+func hashBeforeCompare(ctx context.Context, attribute string, req *resource.ModifyPlanRequest, res *resource.ModifyPlanResponse) {
+	privateKeyPEMPath := path.Root(attribute)
+	var planPrivateKeyPEMStr types.String
+
+	res.Diagnostics.Append(req.Plan.GetAttribute(ctx, privateKeyPEMPath, &planPrivateKeyPEMStr)...)
+	if res.Diagnostics.HasError() {
+		return
+	}
+
+	var statePrivateKeyPEMStr types.String
+
+	res.Diagnostics.Append(req.State.GetAttribute(ctx, privateKeyPEMPath, &statePrivateKeyPEMStr)...)
+	if res.Diagnostics.HasError() {
+		return
+	}
+
+	// The value in the state is a SHA1 hash of the PEM, so we will compute
+	// the SHA1 hash of the value in the plan and compare those hashes. If
+	// they're the same, we will ignore the plan change.
+	planPrivateKeyPEMStrHash := hashForState(planPrivateKeyPEMStr.Value)
+
+	if planPrivateKeyPEMStrHash != statePrivateKeyPEMStr.Value {
+		return
+	}
+
+	res.Diagnostics.Append(res.Plan.SetAttribute(ctx, privateKeyPEMPath, statePrivateKeyPEMStr.Value)...)
+}

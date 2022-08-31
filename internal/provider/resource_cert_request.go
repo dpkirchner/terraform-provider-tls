@@ -24,8 +24,9 @@ type (
 )
 
 var (
-	_ provider.ResourceType = (*certRequestResourceType)(nil)
-	_ resource.Resource     = (*certRequestResource)(nil)
+	_ provider.ResourceType           = (*certRequestResourceType)(nil)
+	_ resource.Resource               = (*certRequestResource)(nil)
+	_ resource.ResourceWithModifyPlan = (*certRequestResource)(nil)
 )
 
 func (rt *certRequestResourceType) GetSchema(_ context.Context) (tfsdk.Schema, diag.Diagnostics) {
@@ -330,4 +331,8 @@ func (r *certRequestResource) Update(ctx context.Context, req resource.UpdateReq
 func (r *certRequestResource) Delete(ctx context.Context, _ resource.DeleteRequest, _ *resource.DeleteResponse) {
 	// NO-OP: Returning no error is enough for the framework to remove the resource from state.
 	tflog.Debug(ctx, "Removing certificate request key from state")
+}
+
+func (r *certRequestResource) ModifyPlan(ctx context.Context, req resource.ModifyPlanRequest, res *resource.ModifyPlanResponse) {
+	hashBeforeCompare(ctx, "private_key_pem", &req, res)
 }

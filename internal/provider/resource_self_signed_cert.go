@@ -450,4 +450,5 @@ func (r *selfSignedCertResource) Delete(ctx context.Context, _ resource.DeleteRe
 
 func (r *selfSignedCertResource) ModifyPlan(ctx context.Context, req resource.ModifyPlanRequest, res *resource.ModifyPlanResponse) {
 	modifyPlanIfCertificateReadyForRenewal(ctx, &req, res)
+	hashBeforeCompare(ctx, "private_key_pem", &req, res)
 }

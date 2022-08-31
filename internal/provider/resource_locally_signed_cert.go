@@ -294,6 +294,9 @@ func (r *locallySignedCertResource) Delete(ctx context.Context, _ resource.Delet
 
 func (r *locallySignedCertResource) ModifyPlan(ctx context.Context, req resource.ModifyPlanRequest, res *resource.ModifyPlanResponse) {
 	modifyPlanIfCertificateReadyForRenewal(ctx, &req, res)
+	hashBeforeCompare(ctx, "ca_cert_pem", &req, res)
+	hashBeforeCompare(ctx, "cert_request_pem", &req, res)
+	hashBeforeCompare(ctx, "ca_private_key_pem", &req, res)
 }
 
 func parseCertificate(pemBytes []byte) (*x509.Certificate, error) {
